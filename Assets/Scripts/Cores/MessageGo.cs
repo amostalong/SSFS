@@ -10,46 +10,95 @@ namespace QGame
         public delegate void CB0();
         public delegate void CB1(object o);
 
-        Dictionary<MessageType, CB0> regedit0 = new Dictionary<MessageType, CB0>();
-        Dictionary<MessageType, CB1> regedit1 = new Dictionary<MessageType, CB1>();
+        Dictionary<MessageType, CB0> regedit0;
+        Dictionary<MessageType, CB1> regedit1;
+        CB0[] updateCB = new CB0[3];
+        
+
+        public ICore Init()
+        {
+            regedit0 = new Dictionary<MessageType, CB0>();
+            regedit1 = new Dictionary<MessageType, CB1>();
+
+            regedit0[MessageType.NormalUpdate] = null;
+            regedit0[MessageType.EarlyUpdate] = null;
+            regedit0[MessageType.LateUpdate] = null;
+
+            return this;
+        }
 
         public void Call(MessageType msg, object o = null)
         {
-            if (regedit0.ContainsKey(msg)) regedit0[msg].Invoke();
-            if (regedit1.ContainsKey(msg)) regedit1[msg].Invoke(o);
+            CB0 cb0;
+            CB1 cb1;
+
+            int _msg = (int)msg;
+
+            if (_msg < 3)
+            {
+                if ((cb0 = updateCB[_msg]) != null) cb0.Invoke();
+            }
+            else
+            {
+                if (regedit0.TryGetValue(msg, out cb0)) cb0.Invoke();
+                if (regedit1.TryGetValue(msg, out cb1)) cb1.Invoke(o);
+            }
         }
 
         public void Register0(MessageType msg, CB0 cb)
         {
-            if (regedit0.ContainsKey(msg))
+            CB0 cb0;
+
+            int _msg = (int)msg;
+
+            if (_msg < 3)
             {
-                regedit0[msg] += cb;
+                if (updateCB[_msg] != null)
+                {
+                    updateCB[_msg] += cb;
+                }
+                else
+                {
+                    updateCB[_msg] = cb;
+                }
             }
             else
             {
+                if (regedit0.TryGetValue(msg, out cb0))
+                {
+                    if (cb0 != null)
+                    {
+                        regedit0[msg] += cb;
+                        return;
+                    }
+                }
+
                 regedit0[msg] = cb;
             }
         }
 
         public void Register1(MessageType msg, CB1 cb)
         {
-            if (regedit1.ContainsKey(msg))
+            CB1 cb1;
+
+            if (regedit1.TryGetValue(msg, out cb1))
             {
-                regedit1[msg] += cb;
+                if (cb1 != null)
+                {
+                    regedit1[msg] += cb;
+                    return;
+                }
             }
-            else
-            {
-                regedit1[msg] = cb;
-            }
+   
+            regedit1[msg] = cb;
+            
         }
 
-        public ICore Init()
-        {
-            return this;
-        }
+
 
         public ICore Reset()
         {
+            Init();
             return this;
         }
 
@@ -63,9 +112,9 @@ namespace QGame
 
     public enum MessageType
     {
-        EarlyUpdate,
-        NormalUpdate,
-        LateUpdate,
+        EarlyUpdate = 0,
+        NormalUpdate = 1,
+        LateUpdate = 2,
 
         InputKeyEvent,
     }
