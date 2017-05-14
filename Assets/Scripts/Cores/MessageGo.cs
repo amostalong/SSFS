@@ -5,7 +5,7 @@ using System;
 
 namespace QGame
 {
-    public class MessageGo : MonoBehaviour, ICore
+    public class MessageGo : ICore
     {
         public delegate void CB0();
         public delegate void CB1(object o);
@@ -21,12 +21,26 @@ namespace QGame
 
         public void Register0(MessageType msg, CB0 cb)
         {
-            regedit0[msg] += cb;
+            if (regedit0.ContainsKey(msg))
+            {
+                regedit0[msg] += cb;
+            }
+            else
+            {
+                regedit0[msg] = cb;
+            }
         }
 
         public void Register1(MessageType msg, CB1 cb)
         {
-            regedit1[msg] += cb;
+            if (regedit1.ContainsKey(msg))
+            {
+                regedit1[msg] += cb;
+            }
+            else
+            {
+                regedit1[msg] = cb;
+            }
         }
 
         public ICore Init()
@@ -37,6 +51,13 @@ namespace QGame
         public ICore Reset()
         {
             return this;
+        }
+
+        public void OnUpdate()
+        {
+            Call(MessageType.EarlyUpdate);
+            Call(MessageType.NormalUpdate);
+            Call(MessageType.LateUpdate);
         }
     }
 

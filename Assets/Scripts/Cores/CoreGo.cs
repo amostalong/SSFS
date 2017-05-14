@@ -6,36 +6,37 @@ namespace QGame
 {
     public class CoreGo
     {
-        static Dictionary<CoreEnum, ICore> coreDic = new Dictionary<CoreEnum, ICore>();
+        static ICore[] cores = new ICore[10];
 
         public static void AddCore(CoreEnum name, ICore core)
         {
-            coreDic[name] = core;
+            int i = (int)name;
+            cores[i] = core;
         }
 
         public static ICore GetCore(CoreEnum name)
         {
-            return coreDic[name];
+            int i = (int)name;
+            return cores[i];
         }
 
         public static void Remove(CoreEnum name)
         {
-            coreDic.Remove(name);
+            int i = (int)name;
+            cores[i] = null;
         }
 
         public static void ResetCore(CoreEnum name)
         {
-            if (coreDic.ContainsKey(name))
-            {
-                coreDic[name].Reset();
-            }
+            int i = (int)name;
+            cores[i].Reset();
         }
 
         public static void ResetAllCores()
         {
-            foreach (var core in coreDic)
+            foreach (var core in cores)
             {
-                core.Value.Reset();
+                core.Reset();
             }
         }
     }
