@@ -97,9 +97,14 @@ public class TimeMgr : SingletonMonoBehaviour<TimeMgr> {
 		return e_inner.id;
 	}
 
-	public void PauseTime(int id, Boolean p)
+	public void PauseTimer(int id, Boolean p)
 	{
 		entitys.Find((obj) => obj.id == id).pause = p;
+	}
+
+	public void RemoveTimer(int id)
+	{
+		entitys.RemoveAt(entitys.FindIndex((obj) => obj.id == id));
 	}
 }
 

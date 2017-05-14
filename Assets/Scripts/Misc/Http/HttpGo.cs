@@ -25,6 +25,11 @@ public class HttpGo : MonoBehaviour
 
 	}
 
+	public void UploadFile()
+	{
+		
+	}
+
 #region Test Scenario
 	IEnumerator TestScenario3()
 	{
