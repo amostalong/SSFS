@@ -5,9 +5,17 @@ using UnityEngine;
 
 namespace QGame
 {
+	public class KeyRegisterInfo
+	{
+		public ButtonKeyType t;
+		public KeyCode k;
+		public Action a;
+	}
+
     public class InputGo : ICore
     {
-        Dictionary<ButtonKeyType, Dictionary<KeyCode, Action>> keyRegisters = new Dictionary<ButtonKeyType, Dictionary<KeyCode, Action>>();
+		//Dictionary<ButtonKeyType, Dictionary<KeyCode, Action>> keyRegisters = new Dictionary<ButtonKeyType, Dictionary<KeyCode, Action>>();
+		List<KeyRegisterInfo> keyRegisters = new List<KeyRegisterInfo>();
 
         public ICore Init()
         {
@@ -19,53 +27,68 @@ namespace QGame
         public ICore Reset()
         {
             keyRegisters.Clear();
-
             return this;
         }
 
-        public void RegisterKeyAction(KeyCode key, Action cb, ButtonKeyType t)
+        public void RegisterKeyAction(KeyCode key, Action a, ButtonKeyType t)
         {
-            if (!keyRegisters.ContainsKey(t))
-            {
-                keyRegisters[t] = new Dictionary<KeyCode, Action>();
-            }
+			foreach (var kri in keyRegisters)
+			{
+				if (kri.t == t && kri.k == key)
+				{
+					kri.a += a;
+					return;
+				}
+			}
 
-            if (!keyRegisters[t].ContainsKey(key))
-            {
-                keyRegisters[t][key] = cb;
-            }
-            else
-            {
-                keyRegisters[t][key] += cb;
-            }
+			var _kri = new KeyRegisterInfo();
+			_kri.a = a;
+			_kri.k = key;
+			_kri.t = t;
+
+			keyRegisters.Add(_kri);
         }
 
-        public void RemoveKeyAction(KeyCode key, Action cb, ButtonKeyType t)
+        public void RemoveKeyAction(KeyCode key, Action a, ButtonKeyType t)
         {
-            var cbs = keyRegisters[t][key];
+			if (a == null) return;
 
-            if (keyRegisters[t][key] != null)
-            {
-                keyRegisters[t][key] -= cb;
-            }
+			int i = 0;
+
+			foreach (var kri in keyRegisters)
+			{
+				if (kri.t == t && kri.k == key)
+				{
+					if (kri.a != null)
+					{
+						kri.a = kri.a - a;
+					}
+
+					if (kri.a == null)
+					{
+						keyRegisters.RemoveAt (i);
+					}
+
+					return;
+				}
+
+				++i;
+			}
         }
 
         void OnUpdate()
         {
-            foreach(var k in keyRegisters)
+            foreach(var kri in keyRegisters)
             {
-                if (k.Key == ButtonKeyType.Down)
+                if (kri.t == ButtonKeyType.Down)
                 {
-                    foreach(var sa in keyRegisters[k.Key])
-                    {
-                        if (sa.Value != null)
-                        {
-                            if (Input.GetKeyDown(sa.Key))
-                            {
-                                sa.Value.Invoke();
-                            }
-                        }
-                    }
+					if (kri.a != null)
+					{
+						if (Input.GetKeyDown(kri.k))
+						{
+							kri.a.Invoke();
+						}
+					}
                 }
             }
         }

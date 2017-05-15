@@ -23,8 +23,8 @@ public class TestScript : MonoBehaviour {
 
         ipt.RegisterKeyAction(KeyCode.W, PrintWWW, ButtonKeyType.Down);
 
-        Invoke("EndInputTest", 3f);
-        Invoke("EndInputTest", 5f);
+        Invoke("EndInputTest", 10f);
+        Invoke("EndInputTest", 15f);
     }
 
     void PrintWWW()
